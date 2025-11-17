@@ -89,23 +89,34 @@ services:
       - cinemaabyss-network
 
   # Events Microservice
-  # events-service:
-  #   build:
-  #     context: ./src/microservices/events
-  #     dockerfile: Dockerfile
-  #   container_name: cinemaabyss-events-service
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #     kafka:
-  #       condition: service_healthy
-  #   ports:
-  #     - "8082:8082"
-  #   environment:
-  #     PORT: 8082
-  #     KAFKA_BROKERS: kafka:9092
-  #   networks:
-  #     - cinemaabyss-network
+  events-service:
+    build:
+      context: ./src/microservices/events
+      dockerfile: Events.Api/Dockerfile
+    container_name: cinemaabyss-events-service
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8082:8082"
+    environment:
+      ASPNETCORE_URLS: http://+:8082
+      KAFKA_BROKERS: kafka:9092
+    networks:
+      - cinemaabyss-network
+    
+  events-consmer:
+    build:
+      context: ./src/microservices/events
+      dockerfile: Events.Consumer/Dockerfile
+    container_name: cinemaabyss-events-consumer
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKERS: kafka:9092
+    networks:
+      - cinemaabyss-network
 
   # Proxy Service (API Gateway)
   proxy-service:
