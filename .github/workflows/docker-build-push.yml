@@ -121,7 +121,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./src/microservices/events
-          file: Events.Api/Dockerfile
+          file: ./src/microservices/events/Events.Api/Dockerfile
           push: true
           tags: ${{ steps.meta-events-api.outputs.tags }}
           labels: ${{ steps.meta-events-api.outputs.labels }}
@@ -144,7 +144,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./src/microservices/events
-          file: Events.Consumer/Dockerfile
+          file: ./src/microservices/events/Events.Consumer/Dockerfile
           push: true
           tags: ${{ steps.meta-events-consumer.outputs.tags }}
           labels: ${{ steps.meta-events-consumer.outputs.labels }}
