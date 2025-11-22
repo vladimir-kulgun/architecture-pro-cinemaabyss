@@ -120,7 +120,7 @@ jobs:
       - name: Build and push Events Api Docker image
         uses: docker/build-push-action@v4
         with:
-          context: ./src/microservices/events/events.api
+          context: ./src/microservices/events/Events.Api
           push: true
           tags: ${{ steps.meta-events-api.outputs.tags }}
           labels: ${{ steps.meta-events-api.outputs.labels }}
