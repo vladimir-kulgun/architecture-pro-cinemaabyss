@@ -127,4 +127,26 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Extract metadata (tags, labels) for Events Consumer
+        id: meta-events-consumer
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.EVENTS_CONSUMER_IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,format=short
+            type=ref,event=branch
+            latest
+
+      - name: Build and push Events Consumer Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./src/microservices/events/events.consumer
+          push: true
+          tags: ${{ steps.meta-events-consumer.outputs.tags }}
+          labels: ${{ steps.meta-events-consumer.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
       
