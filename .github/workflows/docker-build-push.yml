@@ -14,7 +14,8 @@ env:
   REGISTRY: ghcr.io
   MONOLITH_IMAGE_NAME: ${{ github.repository }}/monolith
   MOVIES_SERVICE_IMAGE_NAME: ${{ github.repository }}/movies-service
-  EVENTS_SERVICE_IMAGE_NAME: ${{ github.repository }}/events-service
+  EVENTS_API_IMAGE_NAME: ${{ github.repository }}/events-api
+  EVENTS_CONSUMER_IMAGE_NAME: ${{ github.repository }}/events-consumer
   PROXY_SERVICE_IMAGE_NAME: ${{ github.repository }}/proxy-service
 
 jobs:
@@ -101,6 +102,28 @@ jobs:
           push: true
           tags: ${{ steps.meta-proxy.outputs.tags }}
           labels: ${{ steps.meta-proxy.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Extract metadata (tags, labels) for Events Api
+        id: meta-events-api
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.EVENTS_API_IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,format=short
+            type=ref,event=branch
+            latest
+
+      - name: Build and push Events Api Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./src/microservices/events/events.api
+          push: true
+          tags: ${{ steps.meta-events-api.outputs.tags }}
+          labels: ${{ steps.meta-events-api.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
