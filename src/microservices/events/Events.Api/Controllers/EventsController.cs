@@ -48,5 +48,11 @@ namespace Events.Api.Controllers
             var response = await _mediator.Send(command);
             return Created(string.Empty, response);
         }
+
+        [HttpGet("health")]
+        public async Task<IActionResult> HealthCheck()
+        {
+            return Ok();
+        }
     }
 }
