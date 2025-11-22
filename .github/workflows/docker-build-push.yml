@@ -120,7 +120,8 @@ jobs:
       - name: Build and push Events Api Docker image
         uses: docker/build-push-action@v4
         with:
-          context: ./src/microservices/events/Events.Api
+          context: ./src/microservices/events
+          file: Events.Api/Dockerfile
           push: true
           tags: ${{ steps.meta-events-api.outputs.tags }}
           labels: ${{ steps.meta-events-api.outputs.labels }}
@@ -142,7 +143,8 @@ jobs:
       - name: Build and push Events Consumer Docker image
         uses: docker/build-push-action@v4
         with:
-          context: ./src/microservices/events/events.consumer
+          context: ./src/microservices/events
+          file: Events.Consumer/Dockerfile
           push: true
           tags: ${{ steps.meta-events-consumer.outputs.tags }}
           labels: ${{ steps.meta-events-consumer.outputs.labels }}
