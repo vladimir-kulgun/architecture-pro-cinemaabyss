@@ -52,7 +52,7 @@ namespace Events.Api.Controllers
         [HttpGet("health")]
         public async Task<IActionResult> HealthCheck()
         {
-            return Ok();
+            return Ok("Ok");
         }
     }
 }
