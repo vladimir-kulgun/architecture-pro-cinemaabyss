@@ -105,7 +105,7 @@ services:
     networks:
       - cinemaabyss-network
     
-  events-consmer:
+  events-consumer:
     build:
       context: ./src/microservices/events
       dockerfile: Events.Consumer/Dockerfile
@@ -113,7 +113,10 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
+    ports:
+      - "8083:8083"
     environment:
+      ASPNETCORE_URLS: http://+:8083
       KAFKA_BROKERS: kafka:9092
     networks:
       - cinemaabyss-network
@@ -128,7 +131,7 @@ services:
       - postgres
       - monolith
       - movies-service
-      # - events-service
+      - events-service
     ports:
       - "8000:8000"
     environment:

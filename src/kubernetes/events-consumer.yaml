@@ -40,13 +40,15 @@ spec:
             cpu: "100m"
             memory: "128Mi"
         livenessProbe:
-          tcpSocket:
-            port: 9092
+          httpGet:
+            path: /health/live
+            port: 8083
           initialDelaySeconds: 10
           periodSeconds: 10
         readinessProbe:
-          tcpSocket:
-            port: 9092
+          httpGet:
+            path: /health/ready
+            port: 8083
           initialDelaySeconds: 5
           periodSeconds: 5
       restartPolicy: Always
@@ -61,4 +63,7 @@ metadata:
 spec:
   selector:
     app: events-consumer
+  ports:
+    - port: 8083
+    targetPort: 8083
   type: ClusterIP

@@ -1,25 +1,20 @@
-﻿using System.Threading.Tasks;
-using Events.Consumer.Consumers;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
 namespace Events.Consumer
 {
     internal class Program
     {
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
-            var host = Host.CreateDefaultBuilder(args)
-                .ConfigureServices((context, services) =>
-                {
-                    // Background service
-                    services.AddHostedService<MovieEventsConsumerService>();
-                    services.AddHostedService<UserEventsConsumerService>();
-                    services.AddHostedService<PaymentEventsConsumerService>();
-                })
-                .Build();
-
-            await host.RunAsync();
+            CreateHostBuilder(args).Build().Run();
         }
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseStartup<Startup>();
+            });
     }
 }

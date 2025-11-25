@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Confluent.Kafka;
+using Events.Consumer.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -39,6 +40,8 @@ namespace Events.Consumer.Consumers
         {
             try
             {
+                StartupHealthCheck.MarkOneAsReady();
+
                 while (!stoppingToken.IsCancellationRequested)
                 {
                     try
