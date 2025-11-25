@@ -1,15 +1,15 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: proxy
+  name: events-consumer
   namespace: cinemaabyss
   labels:
-    app: proxy
+    app: events-consumer
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: proxy
+      app: events-consumer
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -18,23 +18,15 @@ spec:
   template:
     metadata:
       labels:
-        app: proxy
+        app: events-consumer
     spec:
       containers:
-      - name: proxy
-        image:  ghcr.io/vladimir-kulgun/architecture-pro-cinemaabyss/proxy-service:latest
+      - name: events-consumer
+        image:  ghcr.io/vladimir-kulgun/architecture-pro-cinemaabyss/events-consumer:latest
         imagePullPolicy: Always
-        ports:
-        - containerPort: 8000
         env:
-        - name: PORT
-          value: "8000"   
-        - name: GRADUAL_MIGRATION
-          value: "true"
-        - name: MOVIES_MIGRATION_PERCENT
-          value: "50"
-        - name: EVENTS_MIGRATION_PERCENT
-          value: "50"     
+        - name: KAFKA_BROKERS
+          value: kafka:9092
         envFrom:
         - configMapRef:
             name: cinemaabyss-config
@@ -47,18 +39,16 @@ spec:
           requests:
             cpu: "100m"
             memory: "128Mi"
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 8000
-          initialDelaySeconds: 5
-          periodSeconds: 10
         livenessProbe:
-          httpGet:
-            path: /health
-            port: 8000
-          initialDelaySeconds: 15
-          periodSeconds: 20
+          tcpSocket:
+            port: 9092
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          tcpSocket:
+            port: 9092
+          initialDelaySeconds: 5
+          periodSeconds: 5
       restartPolicy: Always
       imagePullSecrets:
         - name: dockerconfigjson
@@ -66,12 +56,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: proxy
+  name: events-consumer
   namespace: cinemaabyss
 spec:
   selector:
-    app: proxy
-  ports:
-  - port: 8000
-    targetPort: 8000
+    app: events-consumer
   type: ClusterIP
