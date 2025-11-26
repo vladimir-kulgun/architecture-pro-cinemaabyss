@@ -2,10 +2,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: events-service
+  name: events-consumer
   namespace: {{ .Values.global.namespace }}
   labels:
-    app: events-service
+    app: events-consumer
     app.kubernetes.io/name: {{ include "cinemaabyss.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
@@ -21,19 +21,19 @@ spec:
   template:
     metadata:
       labels:
-        app: events-service
+        app: events-consumer
     spec:
       containers:
-      - name: events-service
-        image:  ghcr.io/vladimir-kulgun/architecture-pro-cinemaabyss/events-api:latest
+      - name: events-consumer
+        image:  ghcr.io/vladimir-kulgun/architecture-pro-cinemaabyss/events-consumer:latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 8082
+        - containerPort: 8083
         env:
         - name: PORT
-          value: "8082"
+          value: "8083"
         - name: ASPNETCORE_URLS
-          value: http://+:8082
+          value: http://+:8083
         - name: KAFKA_BROKERS
           value: kafka:9092
         envFrom:
@@ -50,14 +50,14 @@ spec:
             memory: "128Mi"
         readinessProbe:
           httpGet:
-            path: /api/events/health
-            port: 8082
+            path: /health/ready
+            port: 8083
           initialDelaySeconds: 5
           periodSeconds: 10
         livenessProbe:
           httpGet:
-            path: /api/events/health
-            port: 8082
+            path: /health/live
+            port: 8083
           initialDelaySeconds: 15
           periodSeconds: 20
       restartPolicy: Always
@@ -67,17 +67,17 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: events-service
+  name: events-consumer
   namespace: {{ .Values.global.namespace }}
   labels:
-    app: events-service
+    app: events-consumer
     app.kubernetes.io/name: {{ include "cinemaabyss.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   selector:
-    app: events-service
+    app: events-consumer
   ports:
-  - port: 8082
-    targetPort: 8082
+  - port: 8083
+    targetPort: 8083
   type: ClusterIP
 {{- end }}
