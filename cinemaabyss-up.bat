@@ -22,5 +22,7 @@ kubectl apply -f src/kubernetes/proxy-service.yaml
 @pause
 
 minikube addons enable ingress
+@pause
 kubectl apply -f src/kubernetes/ingress.yaml
+@pause
 minikube tunnel
