@@ -15,13 +15,13 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: proxy-service
+                name: proxy
                 port:
                   number: 8000
           - path: /api/events
             pathType: Prefix
             backend:
               service:
-                name: events-service
+                name: events-api
                 port:
                   number: 8082
