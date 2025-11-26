@@ -25,41 +25,36 @@ spec:
     spec:
       containers:
       - name: proxy-service
-        image:  ghcr.io/vladimir-kulgun/architecture-pro-cinemaabyss/proxy-service:latest
-        imagePullPolicy: Always
+        image:  {{ .Values.proxyService.image.repository }}:{{ .Values.proxyService.image.tag }}
+        imagePullPolicy: {{ .Values.proxyService.image.pullPolicy }}
         ports:
-        - containerPort: 8000
+        - containerPort: {{ .Values.proxyService.service.targetPort }}
         env:
         - name: PORT
-          value: "8000"   
+          value: {{ .Values.proxyService.service.targetPort | quote}}
         - name: GRADUAL_MIGRATION
-          value: "true"
+          value: {{ .Values.config.gradualMigration | quote }}
         - name: MOVIES_MIGRATION_PERCENT
-          value: "50"
+          value: {{ .Values.config.moviesMigrationPercent | quote }}
         - name: EVENTS_MIGRATION_PERCENT
-          value: "50"     
+          value: {{ .Values.config.eventsMigrationPercent | quote }}     
         envFrom:
         - configMapRef:
             name: cinemaabyss-config
         - secretRef:
             name: cinemaabyss-secrets
         resources:
-          limits:
-            cpu: "500m"
-            memory: "512Mi"
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
+          {{- toYaml .Values.proxyService.resources | nindent 10 }}
         readinessProbe:
           httpGet:
             path: /health
-            port: 8000
+            port: {{ .Values.proxyService.service.targetPort }}
           initialDelaySeconds: 5
           periodSeconds: 10
         livenessProbe:
           httpGet:
             path: /health
-            port: 8000
+            port: {{ .Values.proxyService.service.targetPort }}
           initialDelaySeconds: 15
           periodSeconds: 20
       restartPolicy: Always
@@ -79,7 +74,7 @@ spec:
   selector:
     app: proxy-service
   ports:
-  - port: 8000
-    targetPort: 8000
-  type: ClusterIP
+  - port: {{ .Values.proxyService.service.port }}
+    targetPort: {{ .Values.proxyService.service.targetPort }}
+  type: {{ .Values.proxyService.service.type }}
 {{- end }}

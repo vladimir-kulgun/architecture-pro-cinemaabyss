@@ -93,7 +93,7 @@ moviesService:
 eventsService:
   enabled: true
   image:
-    repository: ghcr.io/vladimir-kulgun/architecture-pro-cinemaabyss/events-service
+    repository: ghcr.io/vladimir-kulgun/architecture-pro-cinemaabyss/events-api
     tag: latest
     pullPolicy: Always
   replicas: 1
@@ -202,4 +202,5 @@ ingress:
 config:
   # Strangler Fig configuration
   gradualMigration: "true"
-  moviesMigrationPercent: "100"
+  moviesMigrationPercent: "50"
+  eventsMigrationPercent: "50"

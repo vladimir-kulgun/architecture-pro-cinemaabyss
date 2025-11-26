@@ -25,15 +25,15 @@ spec:
     spec:
       containers:
       - name: events-consumer
-        image:  ghcr.io/vladimir-kulgun/architecture-pro-cinemaabyss/events-consumer:latest
-        imagePullPolicy: Always
+        image:  {{ .Values.eventsConsumer.image.repository }}:{{ .Values.eventsConsumer.image.tag }}
+        imagePullPolicy: {{ .Values.eventsConsumer.image.pullPolicy }}
         ports:
-        - containerPort: 8083
+        - containerPort: {{ .Values.eventsConsumer.service.targetPort }}
         env:
         - name: PORT
-          value: "8083"
+          value: {{ .Values.eventsConsumer.service.targetPort | quote }}
         - name: ASPNETCORE_URLS
-          value: http://+:8083
+          value: http://+:{{ .Values.eventsConsumer.service.targetPort }}
         - name: KAFKA_BROKERS
           value: kafka:9092
         envFrom:
@@ -42,22 +42,17 @@ spec:
         - secretRef:
             name: cinemaabyss-secrets
         resources:
-          limits:
-            cpu: "500m"
-            memory: "512Mi"
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
+          {{- toYaml .Values.eventsConsumer.resources | nindent 10 }}
         readinessProbe:
           httpGet:
             path: /health/ready
-            port: 8083
+            port: {{ .Values.eventsConsumer.service.targetPort }}
           initialDelaySeconds: 5
           periodSeconds: 10
         livenessProbe:
           httpGet:
             path: /health/live
-            port: 8083
+            port: {{ .Values.eventsConsumer.service.targetPort }}
           initialDelaySeconds: 15
           periodSeconds: 20
       restartPolicy: Always
@@ -77,7 +72,7 @@ spec:
   selector:
     app: events-consumer
   ports:
-  - port: 8083
-    targetPort: 8083
-  type: ClusterIP
+  - port: {{ .Values.eventsConsumer.service.port }}
+    targetPort: {{ .Values.eventsConsumer.service.targetPort }}
+  type: {{ .Values.eventsConsumer.service.type }}
 {{- end }}
