@@ -1,4 +1,4 @@
-{{- if .Values.eventsService.enabled }}
+{{- if .Values.eventsConsumer.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -9,10 +9,10 @@ metadata:
     app.kubernetes.io/name: {{ include "cinemaabyss.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
-  replicas: {{ .Values.eventsService.replicas }}
+  replicas: {{ .Values.eventsConsumer.replicas }}
   selector:
     matchLabels:
-      app: events-service
+      app: events-consumer
   strategy:
     type: RollingUpdate
     rollingUpdate:

@@ -11,11 +11,22 @@ MOVIES_SERVICE_HOST=${MOVIES_SERVICE_URL#http://}
 wait_for_host() {
   host=$1
   port=$2
-  while ! nc -z $host $port; do
+  timeout=${3:-60}
+  start_time=$(date +%s)
+
+  while ! nc -z "$host" "$port"; do
     echo "Waiting for $host:$port..."
     sleep 1
+
+    if (( $(date +%s) - start_time > timeout )); then
+      echo "Timeout waiting for $host:$port"
+      return 1
+    fi
   done
+
+  echo "$host:$port is available!"
 }
+
 
 wait_for_host ${MONOLITH_HOST%:*} ${MONOLITH_HOST#*:}
 wait_for_host ${MOVIES_SERVICE_HOST%:*} ${MOVIES_SERVICE_HOST#*:}
