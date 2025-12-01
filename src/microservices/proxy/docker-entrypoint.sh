@@ -31,6 +31,7 @@ wait_for_host() {
 wait_for_host ${MONOLITH_HOST%:*} ${MONOLITH_HOST#*:}
 wait_for_host ${MOVIES_SERVICE_HOST%:*} ${MOVIES_SERVICE_HOST#*:}
 
+# ---------- Build nginx.conf ----------
 NGINX_CONF="/etc/nginx/nginx.conf"
 
 cat > $NGINX_CONF <<EOF
@@ -41,9 +42,31 @@ http {
 EOF
 
 if [ "$GRADUAL_MIGRATION" = "true" ]; then
-  echo "        server ${MONOLITH_HOST} weight=${MOVIES_WEIGHT_OLD};" >> $NGINX_CONF
-  echo "        server ${MOVIES_SERVICE_HOST} weight=${MOVIES_WEIGHT_NEW};" >> $NGINX_CONF
+
+  #
+  # CASE A: MOVIES_WEIGHT_NEW = 0 → FAILOVER SERVER ONLY
+  #
+  if [ "$MOVIES_WEIGHT_NEW" -eq 0 ]; then
+    echo "        server ${MONOLITH_HOST} weight=100;" >> $NGINX_CONF
+    echo "        server ${MOVIES_SERVICE_HOST} backup;" >> $NGINX_CONF
+
+  #
+  # CASE B: MOVIES_WEIGHT_NEW = 100 → full migration to new service
+  #
+  elif [ "$MOVIES_WEIGHT_NEW" -eq 100 ]; then
+    echo "        server ${MONOLITH_HOST} backup;" >> $NGINX_CONF
+    echo "        server ${MOVIES_SERVICE_HOST} weight=100;" >> $NGINX_CONF
+
+  #
+  # CASE C: Between 1 and 99 — weighted balancing
+  #
+  else
+    echo "        server ${MONOLITH_HOST} weight=${MOVIES_WEIGHT_OLD};" >> $NGINX_CONF
+    echo "        server ${MOVIES_SERVICE_HOST} weight=${MOVIES_WEIGHT_NEW};" >> $NGINX_CONF
+  fi
+
 else
+  # No gradual migration → send all traffic to monolith
   echo "        server ${MONOLITH_HOST};" >> $NGINX_CONF
 fi
 
