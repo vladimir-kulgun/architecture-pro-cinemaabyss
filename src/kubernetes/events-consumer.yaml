@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: events-consumer
+  namespace: cinemaabyss
+  labels:
+    app: events-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: events-consumer
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: events-consumer
+    spec:
+      containers:
+      - name: events-consumer
+        image:  ghcr.io/vladimir-kulgun/architecture-pro-cinemaabyss/events-consumer:latest
+        imagePullPolicy: Always
+        env:
+        - name: KAFKA_BROKERS
+          value: kafka:9092
+        envFrom:
+        - configMapRef:
+            name: cinemaabyss-config
+        - secretRef:
+            name: cinemaabyss-secrets
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8083
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8083
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      restartPolicy: Always
+      imagePullSecrets:
+        - name: dockerconfigjson
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: events-consumer
+  namespace: cinemaabyss
+spec:
+  selector:
+    app: events-consumer
+  ports:
+    - port: 8083
+      targetPort: 8083
+  type: ClusterIP

@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Events.Consumer": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}

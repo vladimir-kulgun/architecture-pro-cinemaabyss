@@ -1,0 +1,37 @@
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: movies-service-cb
+spec:
+  host: movies-service.cinemaabyss.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 5
+      http:
+        http1MaxPendingRequests: 10
+        maxRequestsPerConnection: 1
+    outlierDetection:
+      consecutiveErrors: 5
+      interval: 5s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: monolith-cb
+spec:
+  host: monolith.cinemaabyss.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 5
+      http:
+        http1MaxPendingRequests: 10
+        maxRequestsPerConnection: 1
+    outlierDetection:
+      consecutiveErrors: 5
+      interval: 5s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50

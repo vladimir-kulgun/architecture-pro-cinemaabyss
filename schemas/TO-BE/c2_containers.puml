@@ -1,0 +1,73 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "Пользователь")
+
+System_Boundary(front_end, "Пользовательский интерфейс") {
+  Container(smart_tv, "Телевизор", "SmartTV")
+  Container(mobile, "Телефон/Планшет", "Mobile")
+  Container(browser, "Браузер", "browser")
+}
+
+Rel(user, smart_tv, "")
+Rel(user, mobile, "")
+Rel(user, browser, "")
+
+Container(api_gate_way, "Api Gateway", "")
+Rel(smart_tv, api_gate_way, "")
+Rel(mobile, api_gate_way, "")
+Rel(browser, api_gate_way, "")
+
+System_Boundary(monolith, "Монолит") {
+  Container(monolith_be, "Управление пользователями, Метаданные фильмов, Платежи, Подписки", "Backend")
+  Container(monolith_db, "Хранилище данных", "платежи, пользователи, видео, подписки, скидки, метаданные о фильмах (жанры, актёры, оценки)")
+}
+System_Ext(recomendation_system, "Система рекомендаций", "Подборка фильмов для пользователя")
+System_Ext(online_cinema, "Онлайн кинотеатры", "прокат фильмов")
+System_Ext(file_storage, "S3", "файлы с видео")
+System_Ext(payment_system, "Платежная система", "Оплата подписки")
+Rel(api_gate_way, monolith_be, "")
+Rel(monolith_be, monolith_db, "")
+Rel(monolith_be, recomendation_system, "")
+Rel(monolith_be, online_cinema, "")
+Rel(monolith_be, file_storage, "")
+Rel(monolith_be, payment_system, "")
+
+System_Boundary(microservices, "Микросервисы") {
+  ContainerQueue(events_que, "События", "Kafka")
+
+  System_Boundary(movies, "Movies Service") {
+    Container(movies_be, "Метаданные фильмов, Рейтинги, Жанры")
+    Container(movies_db, "жанры, актеры, оценки", "DB")
+  }
+  Rel(api_gate_way, movies_be, "")
+  Rel(movies_be, movies_db, "")
+  Rel(movies_be, online_cinema, "")
+  Rel(movies_be, file_storage, "")
+  Rel(movies_be, events_que, "События фильмов (просмотр, оценка, добавление)")
+
+  System_Boundary(events, "Events Service") {
+    Container(events_be, "Обрабатывает коммуникацию между сервисами на основе событий", "Backend")
+  }
+  Rel(api_gate_way, events_be, "")
+  Rel(events_be, events_que, "События")
+
+  System_Boundary(users, "Users Service") {
+    Container(users_be, "Пользователи")
+    Container(users_db, "Данные пользователей", "DB")
+  }
+  Rel(api_gate_way, users_be, "")
+  Rel(users_be, users_db, "")
+  Rel(users_be, events_que, "События пользователей (регистрация, вход)")
+
+  System_Boundary(payments, "Payment Service") {
+    Container(payments_be, "Платежи")
+    Container(payments_db, "Данные платежей", "DB")
+  }
+  Rel(api_gate_way, payments_be, "")
+  Rel(payments_be, payments_db, "")
+  Rel(payments_be, events_que, "События платежей (успешные, неудачные)")
+  Rel(payments_be, payment_system, "")
+}
+
+@enduml
