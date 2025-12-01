@@ -7,7 +7,6 @@ MOVIES_WEIGHT_OLD=$((100 - MOVIES_WEIGHT_NEW))
 
 MONOLITH_HOST=${MONOLITH_URL#http://}
 MOVIES_SERVICE_HOST=${MOVIES_SERVICE_URL#http://}
-EVENTS_SERVICE_HOST=${EVENTS_SERVICE_URL#http://}
 
 wait_for_host() {
   host=$1
@@ -31,7 +30,6 @@ wait_for_host() {
 
 wait_for_host ${MONOLITH_HOST%:*} ${MONOLITH_HOST#*:}
 wait_for_host ${MOVIES_SERVICE_HOST%:*} ${MOVIES_SERVICE_HOST#*:}
-wait_for_host ${EVENTS_SERVICE_HOST%:*} ${EVENTS_SERVICE_HOST#*:}
 
 # ---------- Build nginx.conf ----------
 NGINX_CONF="/etc/nginx/nginx.conf"
@@ -93,22 +91,6 @@ cat >> $NGINX_CONF <<EOF
 
         location /api/users {
             proxy_pass http://${MONOLITH_HOST};
-            proxy_set_header Host \$host;
-            proxy_set_header X-Real-IP \$remote_addr;
-            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto \$scheme;
-        }
-
-        location /api/payments {
-            proxy_pass http://${EVENTS_SERVICE_HOST}/api/event/payments;
-            proxy_set_header Host \$host;
-            proxy_set_header X-Real-IP \$remote_addr;
-            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto \$scheme;
-        }
-
-        location /api/subsriptions {
-            proxy_pass http://${EVENTS_SERVICE_HOST}/api/event/payments;
             proxy_set_header Host \$host;
             proxy_set_header X-Real-IP \$remote_addr;
             proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
